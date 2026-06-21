@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact Us — MDGenius AI INC</title>
+<meta name="description" content="Request information from MDGenius AI INC. Optional SMS updates with your consent.">
+<style>
+  :root{--deep:#082B42;--baltic:#3A607D;--steel:#97B7C1;--smoke:#F3F3F3;--grey:#7F7F7F;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:#fff;color:#1c1c1c;font-family:Helvetica,Arial,sans-serif;line-height:1.7;font-size:17px;}
+  header{background:var(--deep);color:#fff;padding:38px 24px 30px;}
+  .wrap{max-width:680px;margin:0 auto;padding:0 24px;}
+  header .wrap{padding:0;}
+  h1{font-family:'Space Grotesk',Helvetica,Arial,sans-serif;font-weight:700;font-size:30px;margin:0 0 6px;letter-spacing:-0.01em;}
+  header p{margin:0;color:var(--steel);font-size:15px;}
+  main{padding:42px 0 70px;}
+  label{display:block;font-weight:bold;color:var(--deep);margin:18px 0 5px;font-size:15px;}
+  input,select,textarea{
+    width:100%;padding:12px 14px;border:1px solid #c9c9c9;border-radius:6px;
+    font-family:inherit;font-size:16px;
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--baltic);border-color:var(--baltic);}
+  .consent{
+    display:flex;gap:12px;align-items:flex-start;margin:24px 0 8px;
+    background:var(--smoke);border:1px solid var(--steel);border-radius:6px;padding:16px 18px;
+  }
+  .consent input[type=checkbox]{width:20px;height:20px;margin-top:3px;flex-shrink:0;}
+  .consent label{font-weight:normal;color:#1c1c1c;margin:0;font-size:14px;line-height:1.6;}
+  .consent a{color:var(--baltic);}
+  button{
+    margin-top:24px;background:var(--deep);color:#fff;border:none;border-radius:6px;
+    padding:14px 28px;font-family:'Space Grotesk',Helvetica,Arial,sans-serif;
+    font-size:16px;font-weight:700;cursor:pointer;
+  }
+  button:hover{background:var(--baltic);}
+  .fine{color:var(--grey);font-size:13px;margin-top:14px;line-height:1.6;}
+  footer{border-top:1px solid #e2e2e2;padding:26px 0;color:var(--grey);font-size:14px;margin-top:40px;}
+  footer a{color:var(--baltic);margin-right:18px;}
+  #msg{margin-top:18px;padding:14px;border-radius:6px;display:none;}
+  .ok{background:#e6f4ea;color:#1e5631;} .err{background:#fde8e8;color:#8b1a1a;}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Request Information</h1>
+    <p>MDGenius AI INC &nbsp;&middot;&nbsp; Tell us what you're interested in</p>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <p>Fill out the form below and our team will follow up with the information you requested.</p>
+
+  <form id="contactForm" method="POST" action="/api/contact">
+    <label for="name">Full Name</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="phone">Phone Number</label>
+    <input type="tel" id="phone" name="phone" required>
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="interest">What are you interested in?</label>
+    <select id="interest" name="interest" required>
+      <option value="">Select an option</option>
+      <option>General information</option>
+      <option>Procedure information</option>
+      <option>Pricing</option>
+      <option>Schedule a consultation</option>
+      <option>Other</option>
+    </select>
+
+    <label for="message">Your message (optional)</label>
+    <textarea id="message" name="message" rows="4"></textarea>
+
+    <div class="consent">
+      <input type="checkbox" id="smsConsent" name="smsConsent" value="yes">
+      <label for="smsConsent">
+        I agree to receive SMS text messages from MDGenius AI INC regarding my inquiry,
+        including information about procedures, pricing, scheduling, appointment reminders,
+        and related follow-up. Message frequency varies. Message and data rates may apply.
+        Reply STOP to unsubscribe, HELP for help. See our
+        <a href="/privacy" target="_blank">Privacy Policy</a> and
+        <a href="/terms" target="_blank">Terms of Service</a>.
+      </label>
+    </div>
+    <p class="fine">Checking this box is optional and not required to receive the information you requested.
+    Mobile information and SMS consent are never shared with third parties or affiliates for marketing or promotional purposes.</p>
+
+    <button type="submit">Send Request</button>
+    <div id="msg"></div>
+  </form>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/terms">Terms of Service</a>
+    <a href="/contact">Contact</a>
+    <div style="margin-top:10px;">&copy; 2026 MDGenius AI INC. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+  const form = document.getElementById('contactForm');
+  const msg = document.getElementById('msg');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.style.display='none';
+    const data = Object.fromEntries(new FormData(form).entries());
+    data.smsConsent = form.smsConsent.checked ? 'yes' : 'no';
+    try{
+      const r = await fetch('/api/contact', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+      if(r.ok){
+        msg.className='ok'; msg.style.display='block';
+        msg.textContent='Thank you. Your request has been sent — we will follow up shortly.';
+        form.reset();
+      } else {
+        throw new Error('send failed');
+      }
+    }catch(err){
+      msg.className='err'; msg.style.display='block';
+      msg.textContent='Something went wrong. Please email us directly at info@mdgeniusai.com.';
+    }
+  });
+</script>
+</body>
+</html>
